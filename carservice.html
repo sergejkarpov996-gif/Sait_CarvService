@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarService — Автосервис полного цикла</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C0392B;
+    --red-dark: #96281B;
+    --red-light: #E74C3C;
+    --dark: #111111;
+    --dark2: #1a1a1a;
+    --dark3: #222222;
+    --gray: #2d2d2d;
+    --gray2: #3d3d3d;
+    --light: #f5f5f5;
+    --white: #ffffff;
+    --text-muted: #aaaaaa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--dark);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    background: rgba(10,10,10,0.97);
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 60px;
+    border-bottom: 1px solid #1e1e1e;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 52px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+
+  .logo-icon svg { width: 52px; height: 44px; }
+
+  .logo-text { line-height: 1.1; }
+  .logo-text .name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 2px;
+    color: var(--white);
+  }
+  .logo-text .name span.car { color: #2980b9; }
+  .logo-text .name span.service { color: var(--white); }
+  .logo-text .tagline {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .header-info {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .info-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .info-item .dot {
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .info-item strong { color: var(--white); display: block; font-size: 12px; }
+
+  .header-phone {
+    text-align: right;
+  }
+  .header-phone .hours { font-size: 11px; color: var(--text-muted); }
+  .header-phone .number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    color: var(--white);
+  }
+  .header-phone .callback {
+    display: block;
+    font-size: 11px;
+    color: var(--red);
+    text-decoration: none;
+    cursor: pointer;
+    margin-top: 2px;
+  }
+  .header-phone .callback:hover { text-decoration: underline; }
+
+  .btn-catalog {
+    background: var(--white);
+    color: var(--dark);
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-catalog:hover { background: #e0e0e0; }
+
+  nav {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    padding: 0 60px;
+  }
+
+  nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 14px 22px;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%; right: 50%;
+    height: 2px;
+    background: var(--red);
+    transition: left 0.2s, right 0.2s;
+  }
+
+  nav a:hover { color: var(--white); }
+  nav a:hover::after { left: 0; right: 0; }
+
+  /* HERO */
+  .hero {
+    margin-top: 110px;
+    position: relative;
+    height: calc(100vh - 110px);
+    min-height: 580px;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0808 50%, #0d0d0d 100%);
+  }
+
+  .hero-bg::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C0392B' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    padding: 80px 60px 60px;
+    max-width: 760px;
+  }
+
+  .hero-content h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 7vw, 90px);
+    line-height: 0.95;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-content h1 span { color: var(--red); }
+
+  .hero-badges {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 50px;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+
+  .hero-badge {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .badge-check {
+    width: 28px; height: 28px;
+    background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .badge-check svg { width: 14px; height: 14px; fill: white; }
+
+  .hero-badge p {
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    animation: fadeUp 0.8s ease 0.4s both;
+  }
+
+  .btn-primary {
+    background: var(--red);
+    color: white;
+    border: none;
+    padding: 18px 36px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s, transform 0.2s;
+    text-decoration: none;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  }
+
+  .btn-primary:hover {
+    background: var(--red-dark);
+    transform: translateY(-2px);
+  }
+
+  .hero-callback {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .hero-callback .cb-icon {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTION COMMONS */
+  section { padding: 80px 60px; }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 60px;
+    line-height: 1.05;
+  }
+
+  .section-title span { color: var(--red); }
+
+  /* BRANDS */
+  .brands-section {
+    background: var(--dark2);
+    padding: 60px;
+  }
+
+  .brands-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    border: 1px solid #2a2a2a;
+  }
+
+  .brand-item {
+    width: 130px; height: 100px;
+    display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #555;
+    transition: color 0.2s, background 0.2s;
+    cursor: pointer;
+  }
+
+  .brand-item:hover { color: var(--white); background: #1e1e1e; }
+
+  /* SERVICES */
+  .services-section { background: var(--dark); }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .service-card {
+    background: var(--dark3);
+    padding: 36px 30px;
+    border: 1px solid #2a2a2a;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+    cursor: pointer;
+  }
+
+  .service-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--red);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+
+  .service-card:hover { border-color: #444; transform: translateY(-4px); }
+  .service-card:hover::before { transform: scaleX(1); }
+
+  .service-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .service-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  .service-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .btn-sm {
+    background: var(--red);
+    color: white;
+    border: none;
+    padding: 11px 22px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-sm:hover { background: var(--red-dark); }
+
+  .link-red {
+    color: var(--red);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .link-red:hover { text-decoration: underline; }
+
+  /* PRICELIST BANNER */
+  .price-banner {
+    background: linear-gradient(135deg, #1a0808 0%, var(--dark2) 60%);
+    padding: 0 60px;
+  }
+
+  .price-banner-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: 320px;
+    align-items: center;
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+  }
+
+  .price-banner-text {
+    padding: 60px;
+  }
+
+  .price-banner-text h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 4vw, 52px);
+    letter-spacing: 2px;
+    line-height: 1.05;
+    margin-bottom: 30px;
+  }
+
+  .price-form {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .price-form select, .price-form input {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid #444;
+    color: white;
+    padding: 14px 16px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    outline: none;
+    min-width: 180px;
+  }
+
+  .price-form select option { background: #222; }
+
+  .price-form input::placeholder { color: #666; }
+
+  .price-banner-img {
+    background: var(--gray);
+    height: 100%;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .price-book {
+    width: 200px; height: 260px;
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    border: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: -20px 20px 60px rgba(0,0,0,0.6), 20px -10px 40px rgba(192,57,43,0.1);
+    transform: rotate(-5deg);
+    padding: 30px;
+    text-align: center;
+  }
+
+  .price-book .logo-mini {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+
+  .price-book .price-label {
+    font-size: 10px;
+    color: #666;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-top: 1px solid #444;
+    padding-top: 10px;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  /* WHY US */
+  .why-section {
+    background: var(--dark2);
+    padding: 0;
+  }
+
+  .why-hero-img {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), #111;
+    padding: 80px 60px 120px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .why-hero-img::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(192,57,43,0.08) 0%, transparent 70%);
+  }
+
+  .why-hero-img h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 5.5vw, 72px);
+    letter-spacing: 2px;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.05;
+    position: relative; z-index: 1;
+  }
+
+  .why-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid #2a2a2a;
+  }
+
+  .why-card {
+    padding: 40px 30px;
+    border-right: 1px solid #2a2a2a;
+    background: rgba(0,0,0,0.5);
+  }
+
+  .why-card:last-child { border-right: none; }
+
+  .why-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    background: var(--red);
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 900;
+    margin-bottom: 16px;
+  }
+
+  .why-card h3 { font-size: 15px; font-weight: 700; line-height: 1.4; }
+
+  /* STATS */
+  .stats-section {
+    background: var(--white);
+    color: var(--dark);
+    padding: 60px;
+  }
+
+  .stats-grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    gap: 40px;
+  }
+
+  .stat-item { text-align: center; }
+
+  .stat-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px;
+    line-height: 0.9;
+    color: var(--dark);
+    position: relative;
+    display: inline-block;
+  }
+
+  .stat-number::after {
+    content: '●';
+    position: absolute;
+    top: 8px; right: -16px;
+    color: var(--red);
+    font-size: 16px;
+  }
+
+  .stat-label { font-size: 13px; margin-top: 12px; font-weight: 600; color: #333; }
+  .stat-sublabel { font-size: 12px; color: #777; }
+
+  /* PROMOTIONS */
+  .promo-section { background: var(--white); color: var(--dark); }
+  .promo-section .section-title { color: var(--dark); }
+
+  .promo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .promo-card {
+    padding: 36px;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .promo-card.red { background: var(--red); color: white; }
+  .promo-card.dark-card { background: var(--dark2); color: white; }
+  .promo-card.red2 { background: var(--red-dark); color: white; }
+
+  .promo-card h3 {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .promo-card p { font-size: 12px; opacity: 0.8; }
+
+  .promo-link {
+    color: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 20px;
+  }
+
+  .promo-link::after { content: '→'; }
+  .promo-link:hover { opacity: 0.8; }
+
+  .promo-big-num {
+    position: absolute;
+    right: -10px; bottom: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 140px;
+    opacity: 0.15;
+    line-height: 1;
+    color: white;
+  }
+
+  /* PORTFOLIO */
+  .portfolio-section { background: var(--white); color: var(--dark); }
+  .portfolio-section .section-title { color: var(--dark); }
+
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .portfolio-card {}
+
+  .portfolio-img {
+    width: 100%; height: 220px;
+    background: var(--gray2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .portfolio-img .img-overlay {
+    position: absolute; inset: 0;
+    background: rgba(192,57,43,0);
+    transition: background 0.3s;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .portfolio-card:hover .img-overlay { background: rgba(192,57,43,0.3); }
+
+  .portfolio-thumbs {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .thumb {
+    width: 25%; height: 60px;
+    background: var(--gray2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: #777;
+    overflow: hidden;
+  }
+
+  .portfolio-card h4 { font-size: 16px; font-weight: 700; margin-top: 14px; }
+  .portfolio-card p { font-size: 12px; color: #666; margin-top: 6px; }
+
+  /* STEPS */
+  .steps-section { background: var(--dark); }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  .step-card {
+    background: var(--dark3);
+    padding: 36px 26px;
+    border: 1px solid #2a2a2a;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .step-tag {
+    display: inline-block;
+    background: var(--white);
+    color: var(--dark);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    margin-bottom: 20px;
+  }
+
+  .step-card h3 { font-size: 17px; font-weight: 700; line-height: 1.3; }
+  .step-card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-top: 10px; }
+  .step-card .phone { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; color: var(--white); }
+
+  .step-img {
+    width: 100%; height: 100px;
+    background: var(--gray);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #555;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-top: 20px;
+  }
+
+  /* TOWING */
+  .towing-section {
+    padding: 0 60px 80px;
+    background: var(--dark);
+  }
+
+  .towing-card {
+    background: linear-gradient(135deg, var(--dark3), #1a0808);
+    border: 1px solid #2a2a2a;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 260px;
+    overflow: hidden;
+  }
+
+  .towing-left {
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .towing-left h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+
+  .towing-right {
+    background: var(--gray2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #666;
+    text-transform: uppercase; letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-green {
+    background: #27AE60;
+    color: white;
+    border: none;
+    padding: 16px 28px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    transition: background 0.2s;
+    text-decoration: none;
+  }
+  .btn-green:hover { background: #219A52; }
+
+  /* REVIEWS */
+  .reviews-section {
+    background: var(--white);
+    color: var(--dark);
+    padding: 80px 60px;
+  }
+
+  .reviews-section .section-title { color: var(--dark); }
+
+  .reviews-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 40px;
+  }
+
+  .tab-btn {
+    padding: 14px 36px;
+    background: #eee;
+    color: #666;
+    border: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .tab-btn.active { background: var(--red); color: white; }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .review-card {
+    background: #f7f7f7;
+    border: 1px solid #eee;
+    padding: 20px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #444;
+  }
+
+  .review-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .reviewer-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--gray2);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .reviewer-name { font-weight: 700; font-size: 13px; color: #222; }
+  .reviewer-level { font-size: 10px; color: #888; }
+
+  .stars { color: #f39c12; font-size: 11px; margin-bottom: 8px; }
+
+  /* CONSULTATION */
+  .consultation-section {
+    background: var(--dark2);
+    padding: 80px 60px;
+  }
+
+  .consult-inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+  }
+
+  .consult-left h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 56px);
+    letter-spacing: 2px;
+    line-height: 1.05;
+    margin-bottom: 20px;
+  }
+
+  .consult-left h2 strong { color: var(--red); }
+
+  .consult-hours { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+
+  .consult-phone {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .consult-phone .phone-dot {
+    width: 10px; height: 10px;
+    background: var(--red);
+    border-radius: 50%;
+  }
+
+  .messenger-label { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+
+  .messengers { display: flex; gap: 12px; }
+
+  .messenger-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    font-weight: 900;
+    text-decoration: none;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  .messenger-btn:hover { transform: scale(1.1); opacity: 0.9; }
+  .messenger-btn.tg { background: #2AABEE; color: white; }
+  .messenger-btn.wa { background: #25D366; color: white; }
+
+  .consult-center {
+    text-align: center;
+    position: relative;
+  }
+
+  .mechanic-circle {
+    width: 220px; height: 280px;
+    background: linear-gradient(135deg, #333, #222);
+    border-radius: 4px;
+    display: flex; align-items: flex-end; justify-content: center;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #444;
+  }
+
+  .mechanic-label {
+    position: absolute;
+    bottom: 16px; left: 0; right: 0;
+    text-align: center;
+  }
+
+  .mechanic-label .m-name {
+    font-weight: 700; font-size: 14px;
+  }
+
+  .mechanic-label .m-role {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .consult-form .form-group { margin-bottom: 14px; }
+
+  .consult-form input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #444;
+    color: white;
+    padding: 16px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .consult-form input:focus { border-color: var(--red); }
+  .consult-form input::placeholder { color: #666; }
+
+  .consult-form .btn-primary { width: 100%; justify-content: center; }
+
+  .privacy-note {
+    font-size: 10px;
+    color: #666;
+    margin-top: 10px;
+  }
+
+  .privacy-note a { color: var(--red); }
+
+  /* CONTACTS */
+  .contacts-section {
+    background: var(--white);
+    color: var(--dark);
+    padding: 80px 60px;
+  }
+
+  .contacts-inner {
+    display: grid;
+    grid-template-columns: 280px 1fr 1fr;
+    gap: 40px;
+  }
+
+  .contact-info h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+
+  .contact-line {
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #444;
+  }
+
+  .contact-line .c-icon {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .contact-line strong { color: #111; display: block; }
+
+  .social-icons { display: flex; gap: 10px; margin-top: 8px; }
+
+  .social-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 900;
+    text-decoration: none;
+    color: white;
+    transition: transform 0.2s;
+  }
+  .social-btn:hover { transform: scale(1.1); }
+  .social-btn.fb { background: #1877F2; }
+  .social-btn.ig { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+  .social-btn.vk { background: #4680C2; }
+
+  .contact-photos {
+    display: grid;
+    grid-template-columns: 1fr 80px;
+    grid-template-rows: repeat(3, 90px);
+    gap: 6px;
+  }
+
+  .contact-photo {
+    background: var(--gray2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: #777;
+    text-transform: uppercase; letter-spacing: 1px;
+    overflow: hidden;
+  }
+
+  .contact-photo:first-child { grid-row: 1 / 4; }
+
+  .map-placeholder {
+    background: #ddd;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #888;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .map-placeholder::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #e8e8e8, #d8d8d8);
+  }
+
+  .map-placeholder iframe {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  /* FOOTER */
+  footer {
+    background: #0a0a0a;
+    padding: 30px 60px;
+    border-top: 1px solid #1e1e1e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #555;
+  }
+
+  footer a { color: #777; text-decoration: none; }
+  footer a:hover { color: var(--red); }
+
+  /* FLOATING WA */
+  .floating-wa {
+    position: fixed;
+    bottom: 30px; right: 30px;
+    z-index: 999;
+    width: 54px; height: 54px;
+    background: #25D366;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+    cursor: pointer;
+    transition: transform 0.2s;
+    text-decoration: none;
+    color: white;
+    font-size: 24px;
+    font-weight: 900;
+  }
+  .floating-wa:hover { transform: scale(1.1); }
+
+  /* BEFORE/AFTER */
+  .ba-section { background: var(--dark2); }
+  .ba-section .section-title { color: var(--white); }
+
+  .ba-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+
+  .ba-card {
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+    background: var(--dark3);
+  }
+
+  .ba-images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+  }
+
+  .ba-img {
+    height: 240px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ba-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s;
+  }
+
+  .ba-card:hover .ba-img img { transform: scale(1.04); }
+
+  .ba-label {
+    position: absolute;
+    top: 12px; left: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    z-index: 2;
+  }
+
+  .ba-label.before { background: #555; color: white; }
+  .ba-label.after { background: var(--red); color: white; }
+
+  .ba-divider {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    width: 3px;
+    background: var(--red);
+    z-index: 3;
+  }
+
+  .ba-divider::before {
+    content: '◄►';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--red);
+    color: white;
+    font-size: 10px;
+    padding: 6px 4px;
+    white-space: nowrap;
+  }
+
+  .ba-info {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .ba-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .ba-info p { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  .ba-result {
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .ba-result .result-tag {
+    background: rgba(192,57,43,0.15);
+    border: 1px solid var(--red);
+    color: var(--red);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: inline-block;
+  }
+
+  /* SCROLL UP */
+  .scroll-up {
+    position: fixed;
+    bottom: 30px; right: 96px;
+    z-index: 999;
+    width: 44px; height: 44px;
+    background: var(--red);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 18px;
+    transition: background 0.2s;
+    border: none;
+  }
+  .scroll-up:hover { background: var(--red-dark); }
+
+  /* RESPONSIVE BASICS */
+  @media (max-width: 900px) {
+    header .header-top, nav, section, .price-banner, .contacts-section, .reviews-section, .consultation-section, .towing-section { padding-left: 20px; padding-right: 20px; }
+    .services-grid, .promo-grid, .portfolio-grid, .steps-grid, .why-cards, .reviews-grid { grid-template-columns: 1fr; }
+    .contacts-inner, .consult-inner, .towing-card, .price-banner-inner { grid-template-columns: 1fr; }
+    .brands-grid { overflow-x: auto; flex-wrap: nowrap; width: max-content; }
+    .hero-content { padding: 40px 20px; }
+    .stats-grid { flex-wrap: wrap; }
+    nav { overflow-x: auto; padding: 0 20px; justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg">
+          <!-- gear -->
+          <g opacity="0.7">
+            <circle cx="58" cy="18" r="14" fill="none" stroke="#888" stroke-width="3.5"/>
+            <circle cx="58" cy="18" r="6" fill="#888"/>
+            <rect x="56" y="2" width="4" height="6" rx="2" fill="#888"/>
+            <rect x="56" y="28" width="4" height="6" rx="2" fill="#888"/>
+            <rect x="42" y="16" width="6" height="4" rx="2" fill="#888"/>
+            <rect x="68" y="16" width="6" height="4" rx="2" fill="#888"/>
+            <rect x="46.5" y="6.5" width="4" height="6" rx="2" fill="#888" transform="rotate(45 48.5 9.5)"/>
+            <rect x="67" y="27" width="4" height="6" rx="2" fill="#888" transform="rotate(45 69 30)"/>
+            <rect x="46.5" y="27" width="4" height="6" rx="2" fill="#888" transform="rotate(-45 48.5 30)"/>
+            <rect x="67" y="6.5" width="4" height="6" rx="2" fill="#888" transform="rotate(-45 69 9.5)"/>
+          </g>
+          <!-- sun dot -->
+          <circle cx="63" cy="10" r="4" fill="#f0a500"/>
+          <!-- car outline -->
+          <g fill="none" stroke="#2980b9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 38 C8 28, 18 24, 30 24 L46 24 C54 24, 60 28, 64 34 L68 38 L68 46 L4 46 Z"/>
+            <path d="M12 38 C14 32, 20 28, 30 28 L44 28 C50 28, 56 32, 58 38"/>
+            <circle cx="16" cy="46" r="5" stroke="#2980b9" stroke-width="2"/>
+            <circle cx="56" cy="46" r="5" stroke="#2980b9" stroke-width="2"/>
+            <line x1="21" y1="46" x2="51" y2="46"/>
+            <line x1="4" y1="42" x2="68" y2="42"/>
+          </g>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="name"><span class="car">CAR</span><span class="service">SERVICE</span></div>
+        <div class="tagline">Автосервис полного цикла</div>
+      </div>
+    </div>
+
+    <div class="header-info">
+      <div class="info-item">
+        <div class="dot"></div>
+        <div>
+          <strong>Адрес:</strong>
+          Магнитогорск, Центральный переход, 9
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-catalog">
+      ↓ Скачать каталог с ценами
+    </button>
+
+    <div class="header-phone">
+      <div class="hours">Звоните Пн-Пт: 9 – 18</div>
+      <div class="number" style="font-size:18px;">8 908 086 22 66</div>
+      <div style="font-size:11px; color:#aaa; margin-top:1px;">8 908 054 83 88</div>
+      <a class="callback" href="#">Заказать звонок</a>
+    </div>
+  </div>
+
+  <nav>
+    <a href="#services">Услуги</a>
+    <a href="#promo">Акции</a>
+    <a href="#price">Стоимость</a>
+    <a href="#portfolio">Примеры работ</a>
+    <a href="#towing">Эвакуатор</a>
+    <a href="#reviews">Отзывы</a>
+    <a href="#contacts">Контакты</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero" style="padding:0;">
+  <div class="hero-bg" style="background: linear-gradient(135deg, #0d0505 0%, #1a0808 50%, #090909 100%);">
+    <!-- Real photo as overlay -->
+    <img src="/mnt/user-data/uploads/1773318965147_image.png" 
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.18;object-position:center;"
+         alt="CarService garage">
+  </div>
+  <div class="hero-content" style="max-width:600px; padding: 80px 60px 60px;">
+    <h1 style="font-size: clamp(60px, 8vw, 110px); margin-bottom: 24px;">
+      Ремонтируем<br>и <span>обслуживаем</span><br>ваш<br>автомобиль<br>бережно,<br>с любовью
+    </h1>
+
+    <div class="hero-badges" style="margin-bottom: 40px; gap:20px; flex-wrap:wrap;">
+      <div class="hero-badge">
+        <div class="badge-check">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+        <p>Оплачиваете после<br>ремонта</p>
+      </div>
+      <div class="hero-badge">
+        <div class="badge-check">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+        <p>Работаем официально<br>с оформлением заказ-нарядов и чеков</p>
+      </div>
+      <div class="hero-badge">
+        <div class="badge-check">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+        <p>Только оригинальные<br>запчасти</p>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <a href="#contacts" class="btn-primary">ОСТАВИТЬ ЗАЯВКУ НА РАСЧЕТ СТОИМОСТИ ↗</a>
+      <div class="hero-callback">
+        <div class="cb-icon">✆</div>
+        <div>
+          <div style="font-weight:700; font-size:12px;">Перезвоним</div>
+          <div style="font-size:11px; color:#aaa;">и проконсультируем через 5 минут</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRANDS -->
+<section class="brands-section" id="brands">
+  <h2 class="section-title">Обслуживаем все популярные марки<br>для юридических и физических лиц</h2>
+  <div style="overflow-x:auto;">
+    <div class="brands-grid" style="min-width:900px;">
+      <div class="brand-item">Mercedes</div>
+      <div class="brand-item">Opel</div>
+      <div class="brand-item">Audi</div>
+      <div class="brand-item">MINI</div>
+      <div class="brand-item">Volvo</div>
+      <div class="brand-item">VW</div>
+      <div class="brand-item">Toyota</div>
+      <div class="brand-item">Honda</div>
+      <div class="brand-item">BMW</div>
+      <div class="brand-item">KIA</div>
+      <div class="brand-item">Hyundai</div>
+      <div class="brand-item">Skoda</div>
+      <div class="brand-item">Mazda</div>
+      <div class="brand-item">Ford</div>
+      <div class="brand-item">Nissan</div>
+      <div class="brand-item">Subaru</div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services-section" id="services">
+  <h2 class="section-title">Все услуги в одном месте.<br><span>Несем полную ответственность</span> и даем бессрочную гарантию</h2>
+  <div class="services-grid">
+    <div class="service-card">
+      <h3>Ремонт бензиновых и дизельных двигателей</h3>
+      <p>Авто любых марок. Диагностика, капитальный ремонт, замена деталей двигателя.</p>
+      <div class="service-card-actions">
+        <button class="btn-sm">Оставить заявку</button>
+        <a class="link-red" href="#">Скачать прайс</a>
+      </div>
+    </div>
+    <div class="service-card">
+      <h3>Все типы кузовного ремонта</h3>
+      <p>Ремонт бампера, капота, ремонт после ДТП. Покраска, рихтовка, сварка.</p>
+      <div class="service-card-actions">
+        <button class="btn-sm">Оставить заявку</button>
+        <a class="link-red" href="#">Скачать прайс</a>
+      </div>
+    </div>
+    <div class="service-card">
+      <h3>Электрика</h3>
+      <p>Установка сигнализаций, парктроников, доп. оборудования, мультимедийных систем.</p>
+      <div class="service-card-actions">
+        <button class="btn-sm">Оставить заявку</button>
+        <a class="link-red" href="#">Скачать прайс</a>
+      </div>
+    </div>
+    <div class="service-card">
+      <h3>Ремонт АКПП</h3>
+      <p>Роботы, вариаторы, отдельные узлы коробки. Любая сложность.</p>
+      <div class="service-card-actions">
+        <button class="btn-sm">Оставить заявку</button>
+        <a class="link-red" href="#">Скачать прайс</a>
+      </div>
+    </div>
+    <div class="service-card">
+      <h3>Слесарный цех</h3>
+      <p>Замена масла, фильтров, тех. обслуживание. Ходовая, тормоза, подвеска.</p>
+      <div class="service-card-actions">
+        <button class="btn-sm">Оставить заявку</button>
+        <a class="link-red" href="#">Скачать прайс</a>
+      </div>
+    </div>
+    <div class="service-card">
+      <h3>Детейлинг</h3>
+      <p>Устранение царапин, оклейка, полировка. Защитные покрытия кузова и стекол.</p>
+      <div class="service-card-actions">
+        <button class="btn-sm">Оставить заявку</button>
+        <a class="link-red" href="#">Скачать прайс</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICELIST BANNER -->
+<section class="price-banner" id="price">
+  <div class="price-banner-inner">
+    <div class="price-banner-text">
+      <h2>Гарантируем лучшую цену на рынке. Скачайте полный прайс-лист на все наши услуги с ценами</h2>
+      <div class="price-form">
+        <select>
+          <option>Получить в WhatsApp</option>
+          <option>Получить в Telegram</option>
+          <option>Получить на Email</option>
+        </select>
+        <input type="tel" placeholder="Ваш номер телефона">
+        <button class="btn-primary">ПОЛУЧИТЬ ПРАЙС ↗</button>
+      </div>
+      <div class="privacy-note" style="margin-top:12px;">
+        ☑ Согласен с условиями <a href="#">политики конфиденциальности данных</a>
+      </div>
+    </div>
+    <div class="price-banner-img">
+      <div class="price-book">
+        <div class="logo-mini">CARSERVICE</div>
+        <div style="font-size:11px; color:#888; font-weight:600;">РЕМОНТ АВТО</div>
+        <div class="price-label">ПРАЙС — ЛИСТ</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="why-section" id="why">
+  <div class="why-hero-img">
+    <h2>Ответим, почему вы можете довериться нам и быть полностью спокойны</h2>
+  </div>
+  <div class="why-cards">
+    <div class="why-card">
+      <div class="why-num">01</div>
+      <h3>Сертифицированное немецкое оборудование</h3>
+    </div>
+    <div class="why-card">
+      <div class="why-num">02</div>
+      <h3>Бессрочная гарантия на все работы</h3>
+    </div>
+    <div class="why-card">
+      <div class="why-num">03</div>
+      <h3>Стоимость фиксированная без скрытых платежей и накруток</h3>
+    </div>
+    <div class="why-card">
+      <div class="why-num">04</div>
+      <h3>Специалисты, которые могут собрать/разобрать авто с закрытыми глазами</h3>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-number">8+</div>
+      <div class="stat-label">лет на рынке</div>
+      <div class="stat-sublabel">ремонта авто</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">5.0</div>
+      <div class="stat-label">Рейтинг автосервиса</div>
+      <div class="stat-sublabel">на независимых порталах</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">100</div>
+      <div class="stat-label">м² площадь</div>
+      <div class="stat-sublabel">автосервиса</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">2к+</div>
+      <div class="stat-label">автомобилей</div>
+      <div class="stat-sublabel">отремонтировано</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROMOTIONS -->
+<section class="promo-section" id="promo">
+  <h2 class="section-title" style="color:#111;">Заботимся о бюджете.<br>Актуальные акции и скидки</h2>
+  <div class="promo-grid">
+    <div class="promo-card red">
+      <div>
+        <h3>Бесплатная диагностика двигателя</h3>
+        <p>Нажмите на кнопку «Участвовать в акции», чтобы узнать подробности</p>
+      </div>
+      <a class="promo-link" href="#">Участвовать в акции</a>
+      <div class="promo-big-num">Д</div>
+    </div>
+    <div class="promo-card dark-card">
+      <div>
+        <h3>Скидка 20% на ремонт до конца месяца</h3>
+        <p>Нажмите на кнопку «Участвовать в акции», чтобы узнать подробности</p>
+      </div>
+      <a class="promo-link" href="#">Участвовать в акции</a>
+      <div class="promo-big-num">20%</div>
+    </div>
+    <div class="promo-card red2">
+      <div>
+        <h3>Рассрочка под 0% или кредит</h3>
+        <p>От Т-банка. За 30 секунд. Без переплат.</p>
+      </div>
+      <a class="promo-link" href="#">Участвовать в акции</a>
+      <div class="promo-big-num">0%</div>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE/AFTER -->
+<section class="ba-section" id="portfolio" style="padding: 80px 60px;">
+  <h2 class="section-title">С 2012 года отремонтировали и обслужили<br>бесчисленное количество автомобилей</h2>
+  <p style="text-align:center; color:#777; margin-top:-40px; margin-bottom:50px; font-size:14px;">Примеры работ — до и после</p>
+
+  <div class="ba-grid">
+    <!-- CASE 1 -->
+    <div class="ba-card">
+      <div class="ba-images">
+        <div class="ba-img">
+          <span class="ba-label before">ДО</span>
+          <img src="/mnt/user-data/uploads/1773318965147_image.png" alt="До ремонта — двигатель снят">
+        </div>
+        <div class="ba-img">
+          <span class="ba-label after">ПОСЛЕ</span>
+          <img src="/mnt/user-data/uploads/1773318968822_image.png" alt="После ремонта — кузов восстановлен">
+        </div>
+        <div class="ba-divider"></div>
+      </div>
+      <div class="ba-info">
+        <div>
+          <h4>Восстановление кузова после ДТП</h4>
+          <p>Полный кузовной ремонт: правка геометрии, замена деталей, покраска в цвет</p>
+        </div>
+        <div class="ba-result">
+          <div class="result-tag">✓ Выполнено</div>
+          <div style="font-size:11px; color:#666; margin-top:6px;">2 дня</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CASE 2 - Hyundai Santa Fe -->
+    <div class="ba-card">
+      <div class="ba-images">
+        <div class="ba-img">
+          <span class="ba-label before">ДО</span>
+          <img src="/mnt/user-data/uploads/1773318995162_image.png" alt="До — Hyundai после аварии" style="object-position: bottom;">
+        </div>
+        <div class="ba-img">
+          <span class="ba-label after">ПОСЛЕ</span>
+          <img src="/mnt/user-data/uploads/1773318995162_image.png" alt="После — Hyundai восстановлен" style="object-position: top;">
+        </div>
+        <div class="ba-divider"></div>
+      </div>
+      <div class="ba-info">
+        <div>
+          <h4>Кузовной ремонт Hyundai Santa Fe</h4>
+          <p>Восстановление передней части после лобового столкновения, замена бампера и фар</p>
+        </div>
+        <div class="ba-result">
+          <div class="result-tag">✓ Выполнено</div>
+          <div style="font-size:11px; color:#666; margin-top:6px;">3 дня</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CASE 3 - KIA Rio -->
+    <div class="ba-card">
+      <div class="ba-images">
+        <div class="ba-img">
+          <span class="ba-label before">ДО</span>
+          <img src="/mnt/user-data/uploads/1773319001141_image.png" alt="KIA Rio до" style="object-position: left;">
+        </div>
+        <div class="ba-img">
+          <span class="ba-label after">ПОСЛЕ</span>
+          <img src="/mnt/user-data/uploads/1773319001141_image.png" alt="KIA Rio после" style="object-position: right;">
+        </div>
+        <div class="ba-divider"></div>
+      </div>
+      <div class="ba-info">
+        <div>
+          <h4>Ремонт заднего бампера KIA Rio</h4>
+          <p>Рихтовка, восстановление геометрии бампера и крыла, окраска в цвет кузова</p>
+        </div>
+        <div class="ba-result">
+          <div class="result-tag">✓ Выполнено</div>
+          <div style="font-size:11px; color:#666; margin-top:6px;">1 день</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CASE 4 - KIA exterior -->
+    <div class="ba-card">
+      <div class="ba-images">
+        <div class="ba-img">
+          <span class="ba-label before">ДО</span>
+          <img src="/mnt/user-data/uploads/1773318968822_image.png" alt="Кузов до" style="filter:brightness(0.7);">
+        </div>
+        <div class="ba-img">
+          <span class="ba-label after">ПОСЛЕ</span>
+          <img src="/mnt/user-data/uploads/1773318971947_image.png" alt="Кузов после">
+        </div>
+        <div class="ba-divider"></div>
+      </div>
+      <div class="ba-info">
+        <div>
+          <h4>Полный кузовной ремонт KIA</h4>
+          <p>Снятие двигателя, правка лонжеронов, восстановление геометрии кузова на стапеле</p>
+        </div>
+        <div class="ba-result">
+          <div class="result-tag">✓ Выполнено</div>
+          <div style="font-size:11px; color:#666; margin-top:6px;">5 дней</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOWING -->
+<section class="towing-section" id="towing">
+  <div class="towing-card">
+    <div class="towing-left">
+      <h2>Эвакуатор бесплатно в пределах МКАД</h2>
+      <p style="font-size:13px; color:#aaa; margin-bottom:24px;">Просто напишите нам в WhatsApp</p>
+      <a href="#" class="btn-green">
+        <span>✉</span> Написать в WhatsApp
+      </a>
+    </div>
+    <div class="towing-right">
+      <span>Фото эвакуатора</span>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section class="steps-section" id="steps">
+  <h2 class="section-title">Всего 4 шага к устранению любой<br>неисправности вашего автомобиля за <span>1-2 дня</span></h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div>
+        <div class="step-tag">Шаг 1</div>
+        <h3>Звоните:</h3>
+        <div class="phone">+7(495) 444-44-44</div>
+        <p>На первичной консультации выясняем марку и модель авто, определяем проблему, ориентируем по стоимости.</p>
+      </div>
+      <div>
+        <p style="font-weight:700; color:white; margin-top:20px;">Или оставляйте заявку на сайте</p>
+        <button class="btn-sm" style="margin-top:12px;">ОСТАВИТЬ ЗАЯВКУ</button>
+      </div>
+    </div>
+    <div class="step-card">
+      <div>
+        <div class="step-tag">Шаг 2</div>
+        <h3>Диагностика у нас в автосервисе</h3>
+        <p>Проводим полную диагностику, по результатам которой будет точно понятна проблема и способы её устранения.</p>
+      </div>
+      <div class="step-img">Диагностическое оборудование</div>
+    </div>
+    <div class="step-card">
+      <div>
+        <div class="step-tag">Шаг 3</div>
+        <h3>Обслуживание и ремонт</h3>
+        <p>Выполняем все необходимые работы по ремонту или обслуживанию вашего автомобиля.</p>
+      </div>
+      <div class="step-img">Запчасти и масла</div>
+    </div>
+    <div class="step-card">
+      <div>
+        <div class="step-tag">Шаг 4</div>
+        <h3>Приёмка работ</h3>
+        <p>Проверяете и только тогда оплачиваете, получаете на руки чек и заказ-наряд.</p>
+      </div>
+      <div class="step-img">Документы и чеки</div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews-section" id="reviews">
+  <h2 class="section-title" style="color:#111;">Лучше всего о нашей работе<br>скажут сами клиенты</h2>
+  <div class="reviews-tabs">
+    <button class="tab-btn active">ОТЗЫВЫ</button>
+    <button class="tab-btn">ПРОЦЕСС РАБОТЫ</button>
+  </div>
+  <div class="reviews-grid">
+    <div class="review-card">
+      <div class="review-header">
+        <div class="reviewer-avatar" style="background:#C0392B;">K</div>
+        <div>
+          <div class="reviewer-name">Kirill Rodionov</div>
+          <div class="reviewer-level">Знаток города 17 уровня</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p>Нормальный авто сервис. Но если у них детали заказывать дорогой! Лучше заказать где по дешевле. А так в целом всё супер. Ребята дружелюбные, делают всё быстро...</p>
+    </div>
+    <div class="review-card">
+      <div class="review-header">
+        <div class="reviewer-avatar" style="background:#2980b9;">Б</div>
+        <div>
+          <div class="reviewer-name">Борис Нотариус</div>
+          <div class="reviewer-level">Знаток города 12 уровня</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p>Делал тут развал-схождение на Тундру. Еле влезла)))) но все получилось. Внимательный, грамотный парень. Оборудование — свежее, США. Любо-дорого...</p>
+    </div>
+    <div class="review-card">
+      <div class="review-header">
+        <div class="reviewer-avatar" style="background:#27ae60;">М</div>
+        <div>
+          <div class="reviewer-name">Михаил Поляк</div>
+          <div class="reviewer-level">Знаток города 3 уровня</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p>Спасибо ребятам из сервиса Механика. Крутые мастера делают хорошо и надолго. Добросовестно относятся к работе «мастера своего дела».</p>
+    </div>
+    <div class="review-card">
+      <div class="review-header">
+        <div class="reviewer-avatar" style="background:#8e44ad;">С</div>
+        <div>
+          <div class="reviewer-name">Сергей Л.</div>
+          <div class="reviewer-level">Знаток города 4 уровня</div>
+        </div>
+      </div>
+      <div class="stars">★★★★★</div>
+      <p>Внимательный и вежливый персонал. Вникают в проблему быстро. Редкое место в котором современное не устаревшее оборудование. Делал сход развал на Kia Sorenro Прайм. Ценник порадовал.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONSULTATION -->
+<section class="consultation-section" id="consultation">
+  <div class="consult-inner">
+    <div class="consult-left">
+      <h2>Получите <strong>бесплатную консультацию</strong> лучшего мастера</h2>
+      <div class="consult-hours">Пн-Сб с 9:00 до 18:00;</div>
+      <div class="consult-phone">
+        <div class="phone-dot"></div>
+        8 908 086 22 66
+      </div>
+      <div style="margin-bottom:8px;">
+        <div class="consult-phone" style="font-size:26px;">
+          <div class="phone-dot"></div>
+          8 908 054 83 88
+        </div>
+        <div style="font-size:11px; color:#777; margin-top:-10px; padding-left:20px;">Слесарный ремонт</div>
+      </div>
+      <div class="messenger-label">Пишите нам в мессенджер</div>
+      <div class="messengers">
+        <a href="#" class="messenger-btn tg">✈</a>
+        <a href="#" class="messenger-btn wa">✉</a>
+      </div>
+    </div>
+
+    <div class="consult-center">
+      <div class="mechanic-circle">
+        <div style="text-align:center; padding:20px; width:100%;">
+          <div style="font-size:50px; margin-bottom:10px;">👨‍🔧</div>
+          <div class="mechanic-label">
+            <div class="m-name">Михаил</div>
+            <div class="m-role">Старший автомеханик</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="consult-form">
+      <h3 style="font-size:15px; margin-bottom:8px; color:#aaa;">Прямо по телефону:</h3>
+      <ul style="list-style:disc; padding-left:20px; font-size:12px; color:#aaa; line-height:1.8; margin-bottom:24px;">
+        <li>Расскажем как мы работаем и ответим на вопросы;</li>
+        <li>Выясним в чем проблема;</li>
+        <li>Сориентируем по стоимости и срокам ремонта;</li>
+        <li>Если всё устроит — запишем вас на удобное время.</li>
+      </ul>
+      <div class="form-group">
+        <input type="tel" placeholder="Ваш номер телефона">
+      </div>
+      <button class="btn-primary" style="width:100%; justify-content:center;">ЗАКАЗАТЬ ЗВОНОК ↗</button>
+      <div class="privacy-note">
+        Согласен с условиями <a href="#">политики конфиденциальности данных</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTS -->
+<section class="contacts-section" id="contacts">
+  <h2 style="font-family:'Bebas Neue',sans-serif; font-size:clamp(36px,5vw,56px); letter-spacing:2px; color:#111; text-align:center; margin-bottom:50px;">Наши контакты</h2>
+
+  <div style="display:grid; grid-template-columns:300px 1fr; gap:40px; max-width:1100px; margin:0 auto;">
+    <div class="contact-info">
+      <!-- Phones by department -->
+      <div style="margin-bottom:24px; padding:20px; background:#f8f8f8; border-left:4px solid #C0392B;">
+        <div style="font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#999; margin-bottom:8px;">Кузовной ремонт</div>
+        <a href="tel:+79080862266" style="font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px; color:#111; text-decoration:none;">
+          8 908 086 22 66
+        </a>
+      </div>
+      <div style="margin-bottom:32px; padding:20px; background:#f8f8f8; border-left:4px solid #C0392B;">
+        <div style="font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#999; margin-bottom:8px;">Слесарный ремонт</div>
+        <a href="tel:+79080548388" style="font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px; color:#111; text-decoration:none;">
+          8 908 054 83 88
+        </a>
+      </div>
+
+      <div class="contact-line">
+        <svg class="c-icon" viewBox="0 0 24 24" fill="#C0392B"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        <div>
+          <strong>Россия, Магнитогорск</strong>
+          Центральный переход, 9
+        </div>
+      </div>
+      <div class="contact-line">
+        <svg class="c-icon" viewBox="0 0 24 24" fill="#C0392B"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm.5 5h-1v6l5 3-.75-1.23-4.25-2.52V7z"/></svg>
+        <div>Пн-Сб с 9:00 до 18:00</div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div style="font-size:12px; color:#777; margin-bottom:10px;">Пишите нам</div>
+        <div style="display:flex; gap:10px; margin-bottom:16px;">
+          <a href="#" style="width:40px;height:40px;border-radius:50%;background:#2AABEE;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;font-size:18px;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✈</a>
+          <a href="#" style="width:40px;height:40px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;font-size:18px;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✉</a>
+        </div>
+        <div style="font-size:12px; color:#777; margin-bottom:10px;">Мы в соцсетях</div>
+        <div class="social-icons">
+          <a href="#" class="social-btn vk">vk</a>
+          <a href="#" class="social-btn ig">◎</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yandex Map -->
+    <div style="border-radius:4px; overflow:hidden; border:1px solid #ddd;">
+      <iframe
+        src="https://yandex.ru/map-widget/v1/?ll=59.058571%2C53.414507&z=16&pt=59.058571%2C53.414507%2Cpm2rdm&text=%D0%9C%D0%B0%D0%B3%D0%BD%D0%B8%D1%82%D0%BE%D0%B3%D0%BE%D1%80%D1%81%D0%BA%2C%20%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D0%BF%D0%B5%D1%80%D0%B5%D1%85%D0%BE%D0%B4%2C%209&lang=ru_RU"
+        width="100%"
+        height="420"
+        frameborder="0"
+        allowfullscreen="true"
+        style="display:block; border:none;"
+        title="CarService — Магнитогорск, Центральный переход, 9">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>© 2025 CarService. Все права защищены.</div>
+  <div style="display:flex; gap:24px;">
+    <a href="#">Политика конфиденциальности</a>
+    <a href="#">Реквизиты для юр. лиц</a>
+  </div>
+  <div style="color:#444;">Сделано с любовью</div>
+</footer>
+
+<!-- FLOATING BUTTONS -->
+<a href="#" class="floating-wa" title="WhatsApp">✉</a>
+<button class="scroll-up" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Наверх">↑</button>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Smooth tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Show/hide scroll up button
+  const scrollBtn = document.querySelector('.scroll-up');
+  window.addEventListener('scroll', () => {
+    scrollBtn.style.opacity = window.scrollY > 400 ? '1' : '0';
+  });
+  scrollBtn.style.opacity = '0';
+  scrollBtn.style.transition = 'opacity 0.3s';
+
+  // Animate stats on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.service-card, .step-card, .portfolio-card, .why-card, 
